@@ -1,0 +1,23 @@
+GET http://localhost:3001/api/persons
+
+###
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Ville Valtterinpoika",
+    "number": "040-999999"
+}
+
+###
+
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+    "name": "Pekka Pouta"
+}
+
+###
+DELETE http://localhost:3001/api/persons/5
