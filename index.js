@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 const app = express()
 app.use(express.static('dist'))
@@ -13,32 +15,36 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :p
 let persons = require('./db.json')
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+    Person.find({}).then(people => {
+        response.json(people)
+    })
 })
 
 app.get('/info', (request, response) => {
-    const number = `Phonebook has info for ${persons.length} people<br/>`
-    response.send(number.concat(`${new Date(Date.now())}`))
+    Person.find({}).then(people => {
+        response.send(`Phonebook has info for ${people.length} people<br/>${new Date(Date.now())}`)
+    })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = persons.find(person => person.id === id)
-    if (person) {
-        response.json(person)
-    }
-    else {
-        response.status(404).end()
-    }
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            }
+            else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(400).send({ error: 'malformatted id' })
+        })
 })
 
-const generateId = () => {
-    return Math.floor(Math.random() * 1000000).toString()
-}
-  
 app.post('/api/persons', (request, response) => {
     const body = request.body
-  
+
     if (!body.name) {
       return response.status(400).json({ 
         error: 'name missing' 
@@ -49,21 +55,25 @@ app.post('/api/persons', (request, response) => {
             error: 'number missing'
         })
     }
-    if (persons.map(person => person.name).includes(body.name)) {
+    /*if (persons.map(person => person.name).includes(body.name)) {
         return response.status(400).json({
             error: 'name must be unique'
         })
-    }
+    }*/
   
-    const person = {
-        id: generateId(),
+    const person = new Person ({
         name: body.name,
         number: body.number
-    }
+    })
   
-    persons = persons.concat(person)
-  
-    response.json(person)
+    person.save()
+        .then(savedPerson => {
+            response.json(savedPerson)
+        })
+        .catch(error => {
+            console.log(error)
+            response.status(500).end()
+        })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -79,7 +89,7 @@ app.delete('/api/persons/:id', (request, response) => {
     }
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
