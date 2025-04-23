@@ -18,7 +18,7 @@ export default [
       "object-curly-spacing": ["error", "always"],
       "arrow-spacing": ["error", { before: true, after: true }],
       "@stylistic/js/indent": ["error", 2],
-      "@stylistic/js/linebreak-style": ["error", "windows"],
+      "@stylistic/js/linebreak-style": ["error", "unix"],
       "@stylistic/js/quotes": ["error", "double"],
       "@stylistic/js/semi": ["error", "always"],
       "no-console": "off",
